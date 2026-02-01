@@ -12,6 +12,7 @@
     "@types/react": "^19.2.10",
     "@types/react-dom": "^19.2.3",
     "nitro": "latest",
+    "prisma": "^7.3.0",
     "vite": "beta"
   },
   "dependencies": {
@@ -20,9 +21,11 @@
     "@heroicons/react": "^2.2.0",
     "@mistralai/mistralai": "^1.13.0",
     "@pinecone-database/pinecone": "^7.0.0",
+    "@prisma/client": "^7.3.0",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/react-router": "^1.157.18",
     "@vitejs/plugin-react": "^5.1.2",
+    "better-auth": "^1.4.18",
     "bullmq": "^5.67.2",
     "ioredis": "^5.9.2",
     "react": "^19.2.4",

@@ -1,20 +1,12 @@
+"use client";
+
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ImageUpload } from "@/components/image-upload";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authClient } from "@/lib/auth-client";
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/upload")({
-  beforeLoad: async () => {
-    const { data: session } = await authClient.getSession();
-    if (!session?.user) {
-      throw redirect({
-        to: "/auth/login",
-        search: {
-          redirect: "/upload",
-        },
-      });
-    }
-  },
   component: UploadPage,
 });
 
@@ -29,6 +21,37 @@ interface UploadedImage {
 function UploadPage() {
   const [uploadedImages, setUploadedImages] = useState<UploadedImage[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data: session } = await authClient.getSession();
+      if (!session?.user) {
+        navigate({ 
+          to: "/auth/login",
+          search: { redirect: "/upload" }
+        });
+      } else {
+        setIsAuthenticated(true);
+      }
+      setIsCheckingAuth(false);
+    };
+    checkAuth();
+  }, [navigate]);
+
+  if (isCheckingAuth) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-12">
+        <div className="text-muted-fg">Checking authentication...</div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">

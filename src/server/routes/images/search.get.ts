@@ -1,6 +1,6 @@
 import { defineEventHandler, getQuery, createError } from "h3";
-import { generateEmbedding } from "../../lib/mistral.server";
-import { searchImages } from "../../lib/pinecone.server";
+import { generateEmbedding } from "../lib/mistral.server";
+import { searchImages } from "../lib/pinecone.server";
 
 export default defineEventHandler(async (event) => {
   // TODO: Add proper auth check

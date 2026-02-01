@@ -75,5 +75,5 @@ export default defineEventHandler(async (event) => {
     width: processed.width,
     height: processed.height,
     status: "processing",
-  };
+  });
 });

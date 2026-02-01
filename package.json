@@ -4,7 +4,7 @@
     "build": "vite build",
     "dev": "vite dev",
     "preview": "vite preview",
-    "worker": "bun run server/worker.server.ts"
+    "worker": "bun run src/server/worker.server.ts"
   },
   "devDependencies": {
     "@tanstack/router-devtools": "^1.157.18",

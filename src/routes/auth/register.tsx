@@ -10,9 +10,13 @@ import { Link } from "@/components/ui/link";
 import { Text, TextLink } from "@/components/ui/text";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, createFileRoute } from "@tanstack/react-router";
 
-export default function RegisterPage() {
+export const Route = createFileRoute("/auth/register")({
+  component: RegisterPage,
+});
+
+function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

@@ -1,8 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/search")({
+  beforeLoad: async ({ context }) => {
+    if (!context.auth.isAuthenticated) {
+      throw redirect({
+        to: "/auth/login",
+        search: {
+          redirect: "/search",
+        },
+      });
+    }
+  },
   component: SearchPage,
 });
 

@@ -1,8 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ImageUpload } from "@/components/image-upload";
 import { useState } from "react";
 
 export const Route = createFileRoute("/upload")({
+  beforeLoad: async ({ context }) => {
+    if (!context.auth.isAuthenticated) {
+      throw redirect({
+        to: "/auth/login",
+        search: {
+          redirect: "/upload",
+        },
+      });
+    }
+  },
   component: UploadPage,
 });
 

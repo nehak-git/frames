@@ -11,15 +11,27 @@ import { Link } from "@/components/ui/link";
 import { Text, TextLink } from "@/components/ui/text";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch, createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
-export default function LoginPage() {
+const searchSchema = z.object({
+  redirect: z.string().optional(),
+});
+
+export const Route = createFileRoute("/auth/login")({
+  validateSearch: searchSchema,
+  component: LoginPage,
+});
+
+function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const search = useSearch({ from: "/auth/login" });
+  const redirect = search.redirect || "/";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,13 +43,13 @@ export default function LoginPage() {
         email,
         password,
         rememberMe,
-        callbackURL: "/",
+        callbackURL: redirect,
       });
 
       if (error) {
         setError(error.message || "Login failed");
       } else {
-        navigate({ to: "/" });
+        navigate({ to: redirect });
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

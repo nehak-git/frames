@@ -1,8 +1,8 @@
-import { defineEventHandler, getQuery, createError } from "h3";
+import { defineHandler, getQuery, createError } from "nitro/h3";
 import { generateEmbedding } from "../lib/mistral.server";
 import { searchImages } from "../lib/pinecone.server";
 
-export default defineEventHandler(async (event) => {
+export default defineHandler(async (event) => {
   // TODO: Add proper auth check
   const userId = "demo-user";
 

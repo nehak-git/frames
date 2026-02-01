@@ -1,4 +1,4 @@
-import { defineEventHandler, readMultipartFormData, createError } from "h3";
+import { defineHandler, readMultipartFormData, createError } from "nitro/h3";
 import {
   uploadToR2,
   generateImageKey,
@@ -9,7 +9,7 @@ import { addImageProcessingJob } from "../lib/queue.server";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-export default defineEventHandler(async (event) => {
+export default defineHandler(async (event) => {
   // TODO: Add proper auth check
   const userId = "demo-user";
 

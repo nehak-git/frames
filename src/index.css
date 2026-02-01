@@ -1,0 +1,62 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",
+    "Segoe UI Symbol", "Noto Color Emoji";
+
+  --color-bg: var(--color-white);
+  --color-fg: var(--color-zinc-950);
+  --color-muted: var(--color-zinc-100);
+  --color-muted-fg: var(--color-zinc-500);
+
+  --color-primary: var(--color-zinc-900);
+  --color-primary-fg: var(--color-white);
+
+  --color-secondary: var(--color-zinc-100);
+  --color-secondary-fg: var(--color-zinc-900);
+
+  --color-danger: var(--color-red-600);
+  --color-danger-fg: var(--color-white);
+
+  --color-success: var(--color-emerald-600);
+  --color-success-fg: var(--color-white);
+
+  --color-warning: var(--color-amber-500);
+  --color-warning-fg: var(--color-zinc-900);
+
+  --color-border: var(--color-zinc-200);
+  --color-input: var(--color-zinc-200);
+  --color-ring: var(--color-zinc-900);
+
+  --radius-lg: 0.5rem;
+  --radius-md: 0.375rem;
+  --radius-sm: 0.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-bg text-fg font-sans antialiased;
+  }
+}
+
+.dark {
+  --color-bg: var(--color-zinc-950);
+  --color-fg: var(--color-zinc-50);
+  --color-muted: var(--color-zinc-900);
+  --color-muted-fg: var(--color-zinc-400);
+
+  --color-primary: var(--color-white);
+  --color-primary-fg: var(--color-zinc-900);
+
+  --color-secondary: var(--color-zinc-800);
+  --color-secondary-fg: var(--color-zinc-100);
+
+  --color-border: var(--color-zinc-800);
+  --color-input: var(--color-zinc-800);
+  --color-ring: var(--color-zinc-300);
+}

@@ -1,10 +1,12 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ImageUpload } from "@/components/image-upload";
 import { useState } from "react";
+import { authClient } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/upload")({
-  beforeLoad: async ({ context }) => {
-    if (!context.auth.isAuthenticated) {
+  beforeLoad: async () => {
+    const { data: session } = await authClient.getSession();
+    if (!session?.user) {
       throw redirect({
         to: "/auth/login",
         search: {

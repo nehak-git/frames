@@ -1,12 +1,25 @@
-"use client";
-
-import { createFileRoute } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { authClient } from "@/lib/auth-client";
-import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/search")({
+  beforeLoad: async () => {
+    // Only check auth on client side (cookies not available during SSR)
+    if (typeof window === "undefined") {
+      return;
+    }
+    
+    const { data: session } = await authClient.getSession();
+    if (!session?.user) {
+      throw redirect({
+        to: "/auth/login",
+        search: {
+          redirect: "/search",
+        },
+      });
+    }
+  },
   component: SearchPage,
 });
 
@@ -25,25 +38,6 @@ function SearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: session } = await authClient.getSession();
-      if (!session?.user) {
-        navigate({ 
-          to: "/auth/login",
-          search: { redirect: "/search" }
-        });
-      } else {
-        setIsAuthenticated(true);
-      }
-      setIsCheckingAuth(false);
-    };
-    checkAuth();
-  }, [navigate]);
 
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,18 +62,6 @@ function SearchPage() {
       setIsSearching(false);
     }
   };
-
-  if (isCheckingAuth) {
-    return (
-      <div className="mx-auto max-w-4xl px-4 py-12">
-        <div className="text-muted-fg">Checking authentication...</div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">

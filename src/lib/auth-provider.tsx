@@ -1,49 +1,57 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { authClient } from "./auth-client";
+import { createContext, useContext, useEffect, useState, useCallback, ReactNode } from "react";
+import { authClient, type AuthState } from "./auth-client";
 
-interface AuthContextType {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: { id: string; email: string; name?: string; image?: string } | null;
+interface AuthContextType extends AuthState {
+  refetch: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   isLoading: true,
   user: null,
+  refetch: async () => {},
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<AuthContextType["user"]>(null);
+  const [authState, setAuthState] = useState<AuthState>({
+    isAuthenticated: false,
+    isLoading: true,
+    user: null,
+  });
 
-  useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data } = await authClient.getSession();
-        if (data) {
-          setIsAuthenticated(true);
-          setUser(data.user);
-        } else {
-          setIsAuthenticated(false);
-          setUser(null);
-        }
-      } catch (error) {
-        setIsAuthenticated(false);
-        setUser(null);
-      } finally {
-        setIsLoading(false);
+  const checkSession = useCallback(async () => {
+    try {
+      const { data } = await authClient.getSession();
+      if (data?.session && data?.user) {
+        setAuthState({
+          isAuthenticated: true,
+          isLoading: false,
+          user: data.user as AuthState["user"],
+        });
+      } else {
+        setAuthState({
+          isAuthenticated: false,
+          isLoading: false,
+          user: null,
+        });
       }
-    };
-
-    checkSession();
+    } catch {
+      setAuthState({
+        isAuthenticated: false,
+        isLoading: false,
+        user: null,
+      });
+    }
   }, []);
 
+  useEffect(() => {
+    checkSession();
+  }, [checkSession]);
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, isLoading, user }}>
+    <AuthContext.Provider value={{ ...authState, refetch: checkSession }}>
       {children}
     </AuthContext.Provider>
   );

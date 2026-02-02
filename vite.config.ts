@@ -15,13 +15,18 @@ export default defineConfig({
     react(),
     tailwindcss(),
     nitro({
-      serverDir: "./server",
+      preset: "bun",
+      serverDir: ".",
+      apiDir: "./src/server",
+      experimental: {
+        tasks: true,
+        vite: {},
+      },
     }),
   ],
   resolve: {
     alias: {
       "@": "/src",
-      "~": "/",
     },
   },
 });

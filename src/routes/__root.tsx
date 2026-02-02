@@ -2,17 +2,13 @@
 
 import { createRootRouteWithContext, Link, Outlet } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/router-devtools";
-import { AuthProvider, useAuth } from "@/lib/auth-provider";
 import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { authClient, type AuthState } from "@/lib/auth-client";
+import { useAuth } from "@/lib/auth-provider";
 import { useNavigate } from "@tanstack/react-router";
 
-interface RouterContext {
-  auth: {
-    isAuthenticated: boolean;
-    isLoading: boolean;
-    user: { id: string; email: string; name?: string; image?: string } | null;
-  };
+export interface RouterContext {
+  auth: AuthState;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -20,19 +16,12 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 });
 
 function RootComponent() {
-  return (
-    <AuthProvider>
-      <InnerRootComponent />
-    </AuthProvider>
-  );
-}
-
-function InnerRootComponent() {
-  const { isAuthenticated, isLoading, user } = useAuth();
+  const { isAuthenticated, isLoading, user, refetch } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
     await authClient.signOut();
+    await refetch();
     navigate({ to: "/" });
   };
 
@@ -60,6 +49,18 @@ function InnerRootComponent() {
             </Link>
             {isAuthenticated && (
               <>
+                <Link
+                  to="/gallery"
+                  className="text-muted-fg transition-colors hover:text-fg [&.active]:text-fg [&.active]:font-medium"
+                >
+                  Gallery
+                </Link>
+                <Link
+                  to="/albums"
+                  className="text-muted-fg transition-colors hover:text-fg [&.active]:text-fg [&.active]:font-medium"
+                >
+                  Albums
+                </Link>
                 <Link
                   to="/upload"
                   className="text-muted-fg transition-colors hover:text-fg [&.active]:text-fg [&.active]:font-medium"

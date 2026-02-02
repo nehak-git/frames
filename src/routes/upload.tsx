@@ -1,21 +1,17 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ImageUpload } from "@/components/image-upload";
 import { useState } from "react";
-import { authClient } from "@/lib/auth-client";
+import { getAuthState } from "@/lib/auth-client";
 
 export const Route = createFileRoute("/upload")({
-  beforeLoad: async () => {
-    // Only check auth on client side (cookies not available during SSR)
-    if (typeof window === "undefined") {
-      return;
-    }
-    
-    const { data: session } = await authClient.getSession();
-    if (!session?.user) {
+  beforeLoad: async ({ location }) => {
+    // Fetch fresh auth state (handles page refresh correctly)
+    const auth = await getAuthState();
+    if (!auth.isAuthenticated) {
       throw redirect({
         to: "/auth/login",
         search: {
-          redirect: "/upload",
+          redirect: location.href,
         },
       });
     }

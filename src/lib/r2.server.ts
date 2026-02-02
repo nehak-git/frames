@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID!;
@@ -66,4 +66,13 @@ export function generateThumbnailKey(imageKey: string) {
   const parts = imageKey.split("/");
   const filename = parts.pop()!;
   return [...parts, "thumbnails", filename].join("/");
+}
+
+export async function deleteFromR2(key: string) {
+  const command = new DeleteObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+  });
+
+  await r2Client.send(command);
 }

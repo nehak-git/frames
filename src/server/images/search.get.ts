@@ -1,10 +1,19 @@
 import { defineHandler, getQuery, createError } from "nitro/h3";
-import { generateEmbedding } from "../lib/mistral.server";
-import { searchImages } from "../lib/pinecone.server";
+import { generateEmbedding } from "@/lib/mistral.server";
+import { searchImages } from "@/lib/pinecone.server";
+import { requireAuth } from "@/lib/auth-utils.server";
 
 export default defineHandler(async (event) => {
-  // TODO: Add proper auth check
-  const userId = "demo-user";
+  const session = await requireAuth(event);
+
+  if (!session) {
+    throw createError({
+      statusCode: 401,
+      message: "Unauthorized",
+    });
+  }
+
+  const userId = session.user.id;
 
   const query = getQuery(event);
   const q = query.q as string | undefined;

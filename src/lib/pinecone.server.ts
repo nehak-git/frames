@@ -36,18 +36,16 @@ export async function upsertImageEmbedding(
 ) {
   const index = await getImagesIndex();
 
-  await index.upsert({
-    records: [
-      {
-        id: imageId,
-        values: embedding,
-        metadata: {
-          ...metadata,
-          tags: metadata.tags.join(","),
-        },
+  await index.upsert([
+    {
+      id: imageId,
+      values: embedding,
+      metadata: {
+        ...metadata,
+        tags: metadata.tags.join(","),
       },
-    ],
-  });
+    },
+  ]);
 }
 
 export async function searchImages(
@@ -79,5 +77,5 @@ export async function searchImages(
 
 export async function deleteImageEmbedding(imageId: string) {
   const index = await getImagesIndex();
-  await index.deleteOne({ id: imageId });
+  await index.deleteOne(imageId);
 }

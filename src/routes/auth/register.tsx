@@ -10,6 +10,7 @@ import { Link } from "@/components/ui/link";
 import { Text, TextLink } from "@/components/ui/text";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/auth-provider";
 import { useNavigate, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/auth/register")({
@@ -23,6 +24,7 @@ function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { refetch } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,16 +32,21 @@ function RegisterPage() {
     setError(null);
 
     try {
-      const { data, error } = await authClient.signUp.email({
+      const { data, error: signUpError } = await authClient.signUp.email({
         email,
         password,
         name,
-        callbackURL: "/",
       });
 
-      if (error) {
-        setError(error.message || "Registration failed");
-      } else {
+      if (signUpError) {
+        setError(signUpError.message || "Registration failed");
+        return;
+      }
+
+      if (data) {
+        // Refetch auth state to update the context
+        await refetch();
+        // Navigate to home
         navigate({ to: "/" });
       }
     } catch (err) {

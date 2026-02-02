@@ -11,9 +11,12 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UploadRouteImport } from './routes/upload'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AlbumsIndexRouteImport } from './routes/albums/index'
 import { Route as AuthRegisterRouteImport } from './routes/auth/register'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
+import { Route as AlbumsAlbumIdRouteImport } from './routes/albums/$albumId'
 
 const UploadRoute = UploadRouteImport.update({
   id: '/upload',
@@ -25,9 +28,19 @@ const SearchRoute = SearchRouteImport.update({
   path: '/search',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GalleryRoute = GalleryRouteImport.update({
+  id: '/gallery',
+  path: '/gallery',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AlbumsIndexRoute = AlbumsIndexRouteImport.update({
+  id: '/albums/',
+  path: '/albums/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRegisterRoute = AuthRegisterRouteImport.update({
@@ -40,49 +53,85 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/auth/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlbumsAlbumIdRoute = AlbumsAlbumIdRouteImport.update({
+  id: '/albums/$albumId',
+  path: '/albums/$albumId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/gallery': typeof GalleryRoute
   '/search': typeof SearchRoute
   '/upload': typeof UploadRoute
+  '/albums/$albumId': typeof AlbumsAlbumIdRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/albums/': typeof AlbumsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/gallery': typeof GalleryRoute
   '/search': typeof SearchRoute
   '/upload': typeof UploadRoute
+  '/albums/$albumId': typeof AlbumsAlbumIdRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/albums': typeof AlbumsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/gallery': typeof GalleryRoute
   '/search': typeof SearchRoute
   '/upload': typeof UploadRoute
+  '/albums/$albumId': typeof AlbumsAlbumIdRoute
   '/auth/login': typeof AuthLoginRoute
   '/auth/register': typeof AuthRegisterRoute
+  '/albums/': typeof AlbumsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/search' | '/upload' | '/auth/login' | '/auth/register'
+  fullPaths:
+    | '/'
+    | '/gallery'
+    | '/search'
+    | '/upload'
+    | '/albums/$albumId'
+    | '/auth/login'
+    | '/auth/register'
+    | '/albums/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/search' | '/upload' | '/auth/login' | '/auth/register'
+  to:
+    | '/'
+    | '/gallery'
+    | '/search'
+    | '/upload'
+    | '/albums/$albumId'
+    | '/auth/login'
+    | '/auth/register'
+    | '/albums'
   id:
     | '__root__'
     | '/'
+    | '/gallery'
     | '/search'
     | '/upload'
+    | '/albums/$albumId'
     | '/auth/login'
     | '/auth/register'
+    | '/albums/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GalleryRoute: typeof GalleryRoute
   SearchRoute: typeof SearchRoute
   UploadRoute: typeof UploadRoute
+  AlbumsAlbumIdRoute: typeof AlbumsAlbumIdRoute
   AuthLoginRoute: typeof AuthLoginRoute
   AuthRegisterRoute: typeof AuthRegisterRoute
+  AlbumsIndexRoute: typeof AlbumsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -101,11 +150,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SearchRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/gallery': {
+      id: '/gallery'
+      path: '/gallery'
+      fullPath: '/gallery'
+      preLoaderRoute: typeof GalleryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/albums/': {
+      id: '/albums/'
+      path: '/albums'
+      fullPath: '/albums/'
+      preLoaderRoute: typeof AlbumsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/register': {
@@ -122,15 +185,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/albums/$albumId': {
+      id: '/albums/$albumId'
+      path: '/albums/$albumId'
+      fullPath: '/albums/$albumId'
+      preLoaderRoute: typeof AlbumsAlbumIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GalleryRoute: GalleryRoute,
   SearchRoute: SearchRoute,
   UploadRoute: UploadRoute,
+  AlbumsAlbumIdRoute: AlbumsAlbumIdRoute,
   AuthLoginRoute: AuthLoginRoute,
   AuthRegisterRoute: AuthRegisterRoute,
+  AlbumsIndexRoute: AlbumsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

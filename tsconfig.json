@@ -16,9 +16,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
     "paths": {
-      "@/*": ["./src/*"],
-      "~/*": ["./*"]
+      "@/*": ["./src/*"]
     }
   },
-  "include": ["src", "server", "*.d.ts"]
+  "include": ["src", "server", "*.d.ts", "tasks"]
 }

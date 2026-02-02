@@ -17,6 +17,8 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  images        Image[]
+  albums        Album[]
 }
 
 model Session {
@@ -59,4 +61,66 @@ model Verification {
   updatedAt  DateTime @updatedAt
 
   @@unique([identifier, value])
+}
+
+model Image {
+  id           String   @id @default(cuid())
+  userId       String
+  url          String
+  thumbnailUrl String
+  filename     String
+  description  String?
+  tags         String[] @default([])
+  width        Int?
+  height       Int?
+  size         Int?
+  mimeType     String?
+  status       ImageStatus @default(PROCESSING)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  albums       AlbumImage[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Album {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  coverImageId String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images      AlbumImage[]
+
+  @@index([userId])
+  @@index([isPublic])
+}
+
+model AlbumImage {
+  id        String   @id @default(cuid())
+  albumId   String
+  imageId   String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  
+  album     Album    @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  image     Image    @relation(fields: [imageId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, imageId])
+  @@index([albumId])
+  @@index([imageId])
+}
+
+enum ImageStatus {
+  PROCESSING
+  READY
+  FAILED
 }

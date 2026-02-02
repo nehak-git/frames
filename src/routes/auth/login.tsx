@@ -11,6 +11,7 @@ import { Link } from "@/components/ui/link";
 import { Text, TextLink } from "@/components/ui/text";
 import { TextField } from "@/components/ui/text-field";
 import { authClient } from "@/lib/auth-client";
+import { useAuth } from "@/lib/auth-provider";
 import { useNavigate, useSearch, createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
@@ -32,6 +33,7 @@ function LoginPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth/login" });
   const redirect = search.redirect || "/";
+  const { refetch } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,16 +41,21 @@ function LoginPage() {
     setError(null);
 
     try {
-      const { data, error } = await authClient.signIn.email({
+      const { data, error: signInError } = await authClient.signIn.email({
         email,
         password,
         rememberMe,
-        callbackURL: redirect,
       });
 
-      if (error) {
-        setError(error.message || "Login failed");
-      } else {
+      if (signInError) {
+        setError(signInError.message || "Login failed");
+        return;
+      }
+
+      if (data) {
+        // Refetch auth state to update the context
+        await refetch();
+        // Navigate to the redirect URL
         navigate({ to: redirect });
       }
     } catch (err) {
@@ -91,7 +98,7 @@ function LoginPage() {
                   Forgot password?
                 </TextLink>
               </div>
-              <Input placeholder="Ssshtt, it's a secret" type="password" />
+              <Input placeholder="Ssshht, it's a secret" type="password" />
               <FieldError />
             </TextField>
             

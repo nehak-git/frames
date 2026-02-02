@@ -16,7 +16,7 @@ if (process.env.NODE_ENV !== "production")
 const IMAGES_INDEX = process.env.PINECONE_IMAGES_INDEX || "images";
 
 export async function getImagesIndex() {
-  return pinecone.index(IMAGES_INDEX);
+  return pinecone.index({ name: IMAGES_INDEX });
 }
 
 export interface ImageMetadata {
@@ -34,18 +34,24 @@ export async function upsertImageEmbedding(
   embedding: number[],
   metadata: ImageMetadata
 ) {
+  if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
+    throw new Error(`Cannot upsert image ${imageId}: embedding is empty or invalid`);
+  }
+
   const index = await getImagesIndex();
 
-  await index.upsert([
-    {
-      id: imageId,
-      values: embedding,
-      metadata: {
-        ...metadata,
-        tags: metadata.tags.join(","),
+  await index.upsert({
+    records: [
+      {
+        id: imageId,
+        values: embedding,
+        metadata: {
+          ...metadata,
+          tags: metadata.tags.join(","),
+        },
       },
-    },
-  ]);
+    ],
+  });
 }
 
 export async function searchImages(
@@ -77,5 +83,5 @@ export async function searchImages(
 
 export async function deleteImageEmbedding(imageId: string) {
   const index = await getImagesIndex();
-  await index.deleteOne(imageId);
+  await index.deleteOne({ id: imageId });
 }

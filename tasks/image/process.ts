@@ -1,4 +1,4 @@
-import { defineTask } from "nitro/runtime";
+import { defineTask } from "nitro/task";
 import { analyzeImage, generateImageEmbedding } from "@/lib/mistral.server";
 import { upsertImageEmbedding } from "@/lib/pinecone.server";
 import { prisma } from "@/lib/prisma.server";

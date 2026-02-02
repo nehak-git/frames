@@ -52,9 +52,10 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     inputs: [text],
   });
 
-  const embedding = response.data[0].embedding;
-  if (!embedding) {
-    throw new Error("Failed to generate embedding");
+  const embedding = response.data?.[0]?.embedding;
+  if (!embedding || !Array.isArray(embedding) || embedding.length === 0) {
+    console.error("Embedding response:", JSON.stringify(response, null, 2));
+    throw new Error("Failed to generate embedding - received empty or invalid embedding");
   }
 
   return embedding;

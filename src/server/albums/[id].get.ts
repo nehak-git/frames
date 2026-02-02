@@ -1,4 +1,4 @@
-import { defineHandler, createError, getRouterParam } from "nitro/h3";
+import { defineHandler, HTTPError, getRouterParam } from "nitro/h3";
 import { prisma } from "@/lib/prisma.server";
 import { requireAuth } from "@/lib/auth-utils.server";
 
@@ -6,20 +6,14 @@ export default defineHandler(async (event) => {
   const session = await requireAuth(event);
 
   if (!session) {
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    throw new HTTPError("Unauthorized", { status: 401 });
   }
 
   const userId = session.user.id;
   const albumId = getRouterParam(event, "id");
 
   if (!albumId) {
-    throw createError({
-      statusCode: 400,
-      message: "Album ID is required",
-    });
+    throw new HTTPError("Album ID is required", { status: 400 });
   }
 
   const album = await prisma.album.findFirst({
@@ -51,10 +45,7 @@ export default defineHandler(async (event) => {
   });
 
   if (!album) {
-    throw createError({
-      statusCode: 404,
-      message: "Album not found",
-    });
+    throw new HTTPError("Album not found", { status: 404 });
   }
 
   return {

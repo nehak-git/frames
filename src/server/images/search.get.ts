@@ -1,4 +1,4 @@
-import { defineHandler, getQuery, createError } from "nitro/h3";
+import { defineHandler, HTTPError, getQuery } from "nitro/h3";
 import { generateEmbedding } from "@/lib/mistral.server";
 import { searchImages } from "@/lib/pinecone.server";
 import { requireAuth } from "@/lib/auth-utils.server";
@@ -7,10 +7,7 @@ export default defineHandler(async (event) => {
   const session = await requireAuth(event);
 
   if (!session) {
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    throw new HTTPError("Unauthorized", { status: 401 });
   }
 
   const userId = session.user.id;
@@ -19,10 +16,7 @@ export default defineHandler(async (event) => {
   const q = query.q as string | undefined;
 
   if (!q) {
-    throw createError({
-      statusCode: 400,
-      message: "Missing search query",
-    });
+    throw new HTTPError("Missing search query", { status: 400 });
   }
 
   const embedding = await generateEmbedding(q);

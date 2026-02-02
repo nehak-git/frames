@@ -1,4 +1,5 @@
-import { defineHandler, createError } from "nitro/h3";
+import { defineHandler, HTTPError } from "nitro/h3";
+import { runTask } from "nitro/task";
 import {
   uploadToR2,
   generateImageKey,
@@ -19,10 +20,7 @@ export default defineHandler(async (event) => {
   });
 
   if (!session?.user?.id) {
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    throw new HTTPError("Unauthorized", { status: 401 });
   }
 
   const userId = session.user.id;
@@ -31,25 +29,16 @@ export default defineHandler(async (event) => {
   const file = formData.get("file") as File | null;
 
   if (!file) {
-    throw createError({
-      statusCode: 400,
-      message: "No file provided",
-    });
+    throw new HTTPError("No file provided", { status: 400 });
   }
 
   const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
   if (!allowedTypes.includes(file.type)) {
-    throw createError({
-      statusCode: 400,
-      message: "Invalid file type. Only images are allowed.",
-    });
+    throw new HTTPError("Invalid file type. Only images are allowed.", { status: 400 });
   }
 
   if (file.size > MAX_FILE_SIZE) {
-    throw createError({
-      statusCode: 400,
-      message: "File size must be less than 10MB",
-    });
+    throw new HTTPError("File size must be less than 10MB", { status: 400 });
   }
 
   const arrayBuffer = await file.arrayBuffer();

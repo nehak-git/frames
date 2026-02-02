@@ -1,4 +1,4 @@
-import { defineHandler, createError, getRouterParam } from "nitro/h3";
+import { defineHandler, HTTPError, getRouterParam } from "nitro/h3";
 import { prisma } from "@/lib/prisma.server";
 import { requireAuth } from "@/lib/auth-utils.server";
 import { deleteFromR2 } from "@/lib/r2.server";
@@ -8,20 +8,14 @@ export default defineHandler(async (event) => {
   const session = await requireAuth(event);
 
   if (!session) {
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    throw new HTTPError("Unauthorized", { status: 401 });
   }
 
   const userId = session.user.id;
   const imageId = getRouterParam(event, "id");
 
   if (!imageId) {
-    throw createError({
-      statusCode: 400,
-      message: "Image ID is required",
-    });
+    throw new HTTPError("Image ID is required", { status: 400 });
   }
 
   // Find the image and ensure user owns it
@@ -33,10 +27,7 @@ export default defineHandler(async (event) => {
   });
 
   if (!image) {
-    throw createError({
-      statusCode: 404,
-      message: "Image not found",
-    });
+    throw new HTTPError("Image not found", { status: 404 });
   }
 
   // Extract R2 keys from URLs

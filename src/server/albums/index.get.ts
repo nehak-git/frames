@@ -1,4 +1,4 @@
-import { defineHandler, createError } from "nitro/h3";
+import { defineHandler, HTTPError } from "nitro/h3";
 import { prisma } from "@/lib/prisma.server";
 import { requireAuth } from "@/lib/auth-utils.server";
 
@@ -6,10 +6,7 @@ export default defineHandler(async (event) => {
   const session = await requireAuth(event);
 
   if (!session) {
-    throw createError({
-      statusCode: 401,
-      message: "Unauthorized",
-    });
+    throw new HTTPError("Unauthorized", { status: 401 });
   }
 
   const userId = session.user.id;

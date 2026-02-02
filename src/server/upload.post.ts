@@ -11,6 +11,14 @@ import { auth } from "@/lib/auth";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+// Map format to MIME type
+const FORMAT_TO_MIME: Record<string, string> = {
+  jpeg: "image/jpeg",
+  png: "image/png",
+  gif: "image/gif",
+  webp: "image/webp",
+};
+
 export default defineHandler(async (event) => {
   // Get authenticated user from session
   const session = await auth.api.getSession({
@@ -32,25 +40,30 @@ export default defineHandler(async (event) => {
     throw new HTTPError("No file provided", { status: 400 });
   }
 
-  const allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-  if (!allowedTypes.includes(file.type)) {
-    throw new HTTPError("Invalid file type. Only images are allowed.", { status: 400 });
-  }
-
+  // Basic size check before reading into memory
   if (file.size > MAX_FILE_SIZE) {
     throw new HTTPError("File size must be less than 10MB", { status: 400 });
   }
 
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
+
+  // processImage handles:
+  // - Magic byte validation (doesn't trust client MIME type)
+  // - Pixel limit enforcement (prevents DoS)
+  // - EXIF rotation with correct dimensions
+  // - Throws HTTPError 400 on invalid/corrupted images
   const processed = await processImage(buffer);
+
+  // Use validated format from magic bytes, not client-provided MIME
+  const validatedMimeType = FORMAT_TO_MIME[processed.format] || "image/jpeg";
 
   const filename = file.name || "image.jpg";
   const imageKey = generateImageKey(userId, filename);
   const thumbnailKey = generateThumbnailKey(imageKey);
 
   const [originalUpload, thumbnailUpload] = await Promise.all([
-    uploadToR2(imageKey, processed.original, file.type),
+    uploadToR2(imageKey, processed.original, validatedMimeType),
     uploadToR2(thumbnailKey, processed.thumbnail, "image/webp"),
   ]);
 
@@ -64,7 +77,7 @@ export default defineHandler(async (event) => {
       width: processed.width,
       height: processed.height,
       size: file.size,
-      mimeType: file.type,
+      mimeType: validatedMimeType, // Use validated MIME type
       status: "PROCESSING",
     },
   });

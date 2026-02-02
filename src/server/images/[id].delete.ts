@@ -43,15 +43,17 @@ export default defineHandler(async (event) => {
   const originalKey = getKeyFromUrl(image.url);
   const thumbnailKey = getKeyFromUrl(image.thumbnailUrl);
 
-  // Delete from R2, Pinecone, and database in parallel
+  // Delete from database FIRST (source of truth)
+  // This ensures the image is no longer visible to users even if external cleanup fails
+  await prisma.image.delete({ where: { id: imageId } });
+
+  // Then clean up external resources in parallel
+  // If these fail, orphaned resources can be cleaned up later via background job
+  // This is preferable to having a DB record pointing to deleted resources
   await Promise.all([
-    // Delete from R2
     originalKey ? deleteFromR2(originalKey).catch(console.error) : Promise.resolve(),
     thumbnailKey ? deleteFromR2(thumbnailKey).catch(console.error) : Promise.resolve(),
-    // Delete from Pinecone
     deleteImageEmbedding(imageId).catch(console.error),
-    // Delete from database (this will cascade to AlbumImage)
-    prisma.image.delete({ where: { id: imageId } }),
   ]);
 
   return {

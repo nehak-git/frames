@@ -44,8 +44,12 @@ export default defineHandler(async (event) => {
     select: { id: true },
   });
 
-  const validImageIds = userImages.map((img) => img.id);
-  const invalidIds = imageIds.filter((id: string) => !validImageIds.includes(id));
+  // Create a Set of valid IDs for O(1) lookup
+  const validIdSet = new Set(userImages.map((img) => img.id));
+  
+  // Preserve the original request order by filtering imageIds (not mapping userImages)
+  const validImageIds = imageIds.filter((id: string) => validIdSet.has(id));
+  const invalidIds = imageIds.filter((id: string) => !validIdSet.has(id));
 
   if (invalidIds.length > 0) {
     throw new HTTPError(`Invalid image IDs: ${invalidIds.join(", ")}`, { status: 400 });
